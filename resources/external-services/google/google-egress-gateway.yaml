@@ -1,0 +1,49 @@
+apiVersion: istio.banzaicloud.io/v1beta1
+kind: MeshGateway
+metadata:
+  name: egress-google
+  namespace: external
+spec:
+  maxReplicas: 1
+  minReplicas: 1
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+    - name: https
+      port: 443
+      protocol: TCP
+      targetPort: 8443
+  serviceType: ClusterIP
+  type: egress
+  labels:
+    app: egress-google
+    security.istio.io/tlsMode: istio
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: egress-google
+  namespace: external
+spec:
+  selector:
+    gateway-name: egress-google
+    gateway-type: egress
+  servers:
+    - port:
+        number: 80
+        name: https
+        protocol: HTTPS
+      hosts:
+        - "*"
+      tls:
+        mode: ISTIO_MUTUAL
+    - port:
+        number: 443
+        name: tls
+        protocol: TLS
+      hosts:
+        - "*"
+      tls:
+        mode: ISTIO_MUTUAL

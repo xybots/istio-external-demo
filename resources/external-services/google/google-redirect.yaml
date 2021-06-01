@@ -1,0 +1,52 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: google-external
+  namespace: external
+spec:
+  hosts:
+    - google.com
+    - www.google.com
+  ports:
+    - number: 80
+      name: http
+      protocol: HTTP
+    - number: 443
+      name: tls
+      protocol: TLS
+  resolution: DNS
+  location: MESH_EXTERNAL
+  exportTo:
+  - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: google-egress
+  namespace: external
+spec:
+  hosts:
+    - google.com
+    - www.google.com
+  gateways:
+    - external/egress-google
+  http:
+    - match:
+        - gateways:
+            - external/egress-google
+          port: 80
+      route:
+        - destination:
+            host: google.com
+            port:
+              number: 80
+  tcp:
+    - match:
+        - gateways:
+            - external/egress-google
+          port: 443
+      route:
+        - destination:
+            host: google.com
+            port:
+              number: 443

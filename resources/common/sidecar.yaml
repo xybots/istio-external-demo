@@ -1,0 +1,11 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: test-app-restrict
+  namespace: test-app
+spec:
+  egress:
+    - hosts:
+        - ./*
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
